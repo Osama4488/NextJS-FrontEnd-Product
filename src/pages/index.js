@@ -1,118 +1,128 @@
-import Image from "next/image";
-import { Inter } from "next/font/google";
+// Frontend code (TextGenerator.js)
 
-const inter = Inter({ subsets: ["latin"] });
+import React, { useState } from "react";
+import { TextField, Button, Typography, Paper, Container } from "@mui/material";
+import parser from "html-react-parser";
 
-export default function Home() {
+const TextGenerator = () => {
+  const [response, setResponse] = useState("");
+  const [promptText, setPromptText] = useState("");
+  const [messages, setMessages] = useState("");
+  const [loading, setLoading] = useState(false);
+  // const handleSubmit = async () => {
+  //   try {
+  //     const apiKey = "AIzaSyCTMc8pntwJmyEftgYmUisSA9-ARqSRyqk";
+  //     const apiUrl = `https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=${apiKey}`;
+
+  //     const requestBody = {
+  //       prompt: {
+  //         text: promptText,
+  //       },
+  //     };
+
+  //     const response = await fetch(apiUrl, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(requestBody),
+  //     });
+
+  //     const data = await response.json();
+  //     const cleanOutput = cleanUpOutput(data.candidates[0].output);
+  //     console.log(data, "data");
+  //     // setResponse(cleanOutput);
+  //     setResponse((prevResponses) => [...prevResponses, cleanOutput]);
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //     setResponse("Error fetching data");
+  //   }
+  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessages("");
+    setLoading(true);
+
+    try {
+      const apiKey = "AIzaSyCTMc8pntwJmyEftgYmUisSA9-ARqSRyqk";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=${apiKey}`;
+
+      const requestBody = {
+        prompt: {
+          text: promptText,
+        },
+      };
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+      const responseData = await response.json();
+      const output = responseData.candidates[0].output;
+      console.log(output, "output");
+
+      // const reader = response.body
+      //   .pipeThrough(new TextDecoderStream())
+      //   .getReader();
+      // console.log(reader, "reader");
+
+      // while (true) {
+      //   const { value, done } = await reader.read();
+      //   if (done) {
+      //     setLoading(false);
+      //     break;
+      //   }
+      //   console.log("Received: ", value);
+      //   const cleanedOutput = cleanUpOutput(value.candidates[0].output);
+      //   setMessages((prevMessages) => prevMessages + cleanedOutput);
+
+      // }
+      const cleanedOutput = cleanUpOutput(output);
+      setMessages((prevMessages) => prevMessages + cleanedOutput);
+    } catch (error) {
+      console.error("Error:", error);
+      setLoading(false);
+      setMessages("Error fetching messages");
+    }
+  };
+
+  const cleanUpOutput = (output) => {
+    // Remove code block delimiters ("```") from start and end of the output
+    let cleanedOutput = output.replace(/^```([^]*)```$/, "$1");
+    // Replace escaped characters with their actual representation
+    cleanedOutput = cleanedOutput.replace(/\\n/g, "\n");
+    // Trim leading and trailing whitespace
+    cleanedOutput = cleanedOutput.trim();
+    return cleanedOutput;
+  };
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    <Container maxWidth="md">
+      <Typography variant="h4" align="center" gutterBottom>
+        Text Generator
+      </Typography>
+      <TextField
+        label="Enter prompt text"
+        variant="outlined"
+        fullWidth
+        value={promptText}
+        onChange={(e) => setPromptText(e.target.value)}
+        style={{ marginBottom: "16px" }}
+      />
+      <Button variant="contained" color="primary" onClick={handleSubmit}>
+        Generate Text
+      </Button>
+      <Paper elevation={3} style={{ marginTop: "16px", padding: "16px" }}>
+        <Typography variant="body1">
+          {/* {response} */}
+          {parser(messages)}
+        </Typography>
+      </Paper>
+    </Container>
   );
-}
+};
+
+export default TextGenerator;
